@@ -1,4 +1,4 @@
 [core]
     remote = myremote
 ['remote "myremote"']
-    url = gdrive://1A7u7n_36n51lw1KQS2_S6s_cQDLttKXZ
+    url = gs://david_ortiz_projects/dvc_deep_spectra
