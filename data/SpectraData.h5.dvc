@@ -1,0 +1,5 @@
+outs:
+- md5: 87aaf6c945b1203fe314f94882679905
+  size: 86088000
+  hash: md5
+  path: SpectraData.h5
