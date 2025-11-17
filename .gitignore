@@ -1,0 +1,17 @@
+# Python folders
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual envs
+venv/
+env/
+.venv/
+.py_env/
+
+# vscode config files
+.vscode/
+
+# Dependecies
+*.egg-info/
