@@ -17,3 +17,4 @@ env/
 *.egg-info/
 
 gcp_service_account_credentials.json
+*.code-workspace
