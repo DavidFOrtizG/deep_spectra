@@ -31,7 +31,7 @@ synthetic_data:
   # ----------------------------------------------------
   model_params:
     # Gaussian noise properties
-    noise_std: !!float 6.0e12  # Standard deviation of the Gaussian noise
+    noise_std: !!float 5.0e12  # Standard deviation of the Gaussian noise
 
     # Non-metalic element absorption line properties
     non_metals:

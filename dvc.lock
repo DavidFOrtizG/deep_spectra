@@ -18,7 +18,7 @@ stages:
             n_spectra: 5000
             random_parameters: false
           model_params:
-            noise_std: 6000000000000.0
+            noise_std: 5000000000000.0
             non_metals:
               depth: 0.5
               gamma: 5e-10
@@ -28,5 +28,5 @@ stages:
     outs:
     - path: data/SpectraData.h5
       hash: md5
-      md5: f12f238e275250420a702f4194d2fb8e
+      md5: 41d08976d63c4db3754219964ab5b066
       size: 43048640
