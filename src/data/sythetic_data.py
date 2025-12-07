@@ -2,7 +2,8 @@ import argparse
 import numpy as np
 import h5py
 from pathlib import Path
-from ..physics.constants import c, h, k_B, H_alpha, H_beta, H_gamma, H_delta, Ca_H, Ca_K, Mg_b
+from tqdm import tqdm
+from src.physics.constants import c, h, k_B, H_alpha, H_beta, H_gamma, H_delta, Ca_H, Ca_K, Mg_b
 
 def lambda_0_dom(z: float, lambda_instrument_data: np.ndarray) -> np.ndarray:
     '''
@@ -132,7 +133,7 @@ if __name__ == "__main__":
     spectra_data = np.zeros((N_spectra+1, N_lambda+1))
     spectra_data[0, 1:] = lambda_instrument_data
 
-    for i in range(N_spectra):
+    for i in tqdm(range(N_spectra), total=N_spectra, desc="Generating spectra"):
         spectra_data[i+1,0], spectra_data[i+1,1:] = spectrum_generator(T_values[i], z_values[i], lambda_instrument_data, args.random_parameters, noise_standar_dev=standar_dev, line_params=line_params)
     
     FILE_DIR = Path(__file__).resolve().parent
@@ -160,11 +161,11 @@ if __name__ == "__main__":
         temperature_ds.attrs['units'] = 'K'
 
         spectra_grp = f.create_group('Spectra')
-        for i in range(N_spectra):
+        for i in tqdm(range(N_spectra), total=N_spectra, desc=f"Saving data to {h5_path}"):
             # Create dataset for each spectrum
             spec_ds = spectra_grp.create_dataset(
                 f'spec_{i}',
-                data=spectra_data[i+1, 1:]  # shape (1000,)
+                data=spectra_data[i+1, 1:]  
             )
             # METADATA PER SPECTRUM
             spec_ds.attrs['description'] = f'Spectrum number {i}'
