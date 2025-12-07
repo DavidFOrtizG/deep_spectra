@@ -1,0 +1,32 @@
+schema: '2.0'
+stages:
+  synthetic_data_generation:
+    cmd: python -m src.data.synthetic_data
+    deps:
+    - path: src/data/synthetic_data.py
+      hash: md5
+      md5: 2ad428f50069875f606b1b8e35f5dda3
+      size: 9885
+    params:
+      params.yaml:
+        synthetic_data:
+          instrument:
+            min_lambda: 400.0
+            max_lambda: 900.0
+            n_lambda: 1000
+          dataset:
+            n_spectra: 5000
+            random_parameters: false
+          model_params:
+            noise_std: 6000000000000.0
+            non_metals:
+              depth: 0.5
+              gamma: 5e-10
+            metals:
+              depth: 0.2
+              gamma: 2e-10
+    outs:
+    - path: data/SpectraData.h5
+      hash: md5
+      md5: f12f238e275250420a702f4194d2fb8e
+      size: 43048640
