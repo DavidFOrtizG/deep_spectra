@@ -1,0 +1,44 @@
+
+# ----------------------------------------------------
+# 1. SYNTHETIC DATA GENERATION
+# ----------------------------------------------------
+
+synthetic_data:
+  # ----------------------------------------------------
+  # A. INSTRUMENT PARAMETERS
+  # ----------------------------------------------------
+  instrument:
+    # The instrument's channel range in nanometers (nm)
+    min_lambda: 400.0  # Minimum wavelength
+    max_lambda: 900.0  # Maximum wavelength
+    n_lambda: 1000     # Amount of channels
+
+  # ----------------------------------------------------
+  # B. GENERATION/DATASET PARAMETERS
+  # ----------------------------------------------------
+  dataset:
+    # Total number of spectra to be generated
+    n_spectra: 5000
+    
+    # Option to enable random generation of specific variables. 
+    # Gaussian noise std (1e12 to 1e13), depth (0.5 to 0.9), gamma (5e-10 to 2e-9), depth_metals (0.2 to 0.7) and gamma_metals (2e-10 to 1e-9)"
+    # If true, the specific values below are ignored.
+    random_parameters: false
+
+
+  # ----------------------------------------------------
+  # C. NOISE AND ABSORPTION LINE MODEL PARAMETERS
+  # ----------------------------------------------------
+  model_params:
+    # Gaussian noise properties
+    noise_std: !!float 6.0e12  # Standard deviation of the Gaussian noise
+
+    # Non-metalic element absorption line properties
+    non_metals:
+      depth: 0.5       # Depth (0 to 1)
+      gamma: !!float 5.0e-10   # Width in nm
+
+    # Metalic element absorption line properties
+    metals:
+      depth: 0.2       # Depth (0 to 1)
+      gamma: !!float 2.0e-10   # Width in nm

@@ -1,0 +1,9 @@
+stages:
+  synthetic_data_generation:
+    cmd: python -m src.data.synthetic_data
+    deps:
+    - src/data/synthetic_data.py
+    params:
+    - synthetic_data
+    outs:
+    - data/SpectraData.h5

@@ -4,6 +4,7 @@ import h5py
 from pathlib import Path
 from tqdm import tqdm
 from src.physics.constants import c, h, k_B, H_alpha, H_beta, H_gamma, H_delta, Ca_H, Ca_K, Mg_b
+import yaml
 
 def lambda_0_dom(z: float, lambda_instrument_data: np.ndarray) -> np.ndarray:
     '''
@@ -95,36 +96,73 @@ def spectrum_generator(T, z, lambda_instrument_data, random_parameters: bool = F
     spectrum = noise_generator(emission_data, random_parameters, noise_standar_dev)
     return z, spectrum
 
-if __name__ == "__main__":
+def load_config(config_path='params.yaml'):
+    """Loads configuration parameters from a YAML file."""
+    try:
+        with open(config_path, 'r') as f:
+            return yaml.safe_load(f)
+    except FileNotFoundError:
+        print(f"Error: Configuration file not found at {config_path}. Please check the path.")
+        exit(1)
 
-    parser = argparse.ArgumentParser(description="Blackbody radiation with absortion lines data generator")
-    parser.add_argument("--min_lambda", type=float, default=400, help="Minimum wave lenght measured by the instrument in nm. Default 400")
-    parser.add_argument("--max_lambda", type=float, default=900, help="Max wave lenght measured by the instrument in nm. Default 900")
-    parser.add_argument("-n_lambda", type=float, default=1000, help="Amount of channels of the instrument. Default 1000")
-    parser.add_argument("-n_spectra", type=float, default=5000, help="Amount of spectrums generated. Default 5000")
-    parser.add_argument("--random_parameters", action="store_true" , help="Sets certain variables in a random value in a range: Gaussian noise std (1e12 to 1e13), depth (0.5 to 0.9), gamma (5e-10 to 2e-9), depth_metals (0.2 to 0.7) and gamma_metals (2e-10 to 1e-9)")
-    parser.add_argument("--noise_std", type=float, default=5e12, help="Gausina noise standard deviation")
-    parser.add_argument("--depth", type=float, default=0.5, help="Non metalic elements absortion line depth between 0 and 1")
-    parser.add_argument("--depth_metals", type=float, default=0.2, help="Metalic elements absortion line depth between 0 and 1")
-    parser.add_argument("--gamma", type=float, default= 5e-10, help="Non metalic elements absortion line width in nm")
-    parser.add_argument("--gamma_metals", type=float, default=2e-10, help="Metalic elements absortion line width in nm")
+# --- Main execution block updated to use YAML ---
+if __name__ == "__main__":
     
+    # 1. Use argparse ONLY to get the configuration file path (optional, default is params.yaml)
+    parser = argparse.ArgumentParser(description="Blackbody radiation with absortion lines data generator")
+    parser.add_argument('--config', type=str, default='params.yaml', help='Path to the YAML configuration file.')
     args = parser.parse_args()
     
-    # Wave lenght domain
-    lambda_min_measured = args.min_lambda
-    lambda_max_measured = args.max_lambda
-    N_lambda = args.n_lambda
-    lambda_instrument_data = np.linspace(lambda_min_measured, lambda_max_measured, N_lambda) * 1e-9
+    # 2. Load the full configuration
+    full_config = load_config(args.config)
+    
+    # 3. Extract the 'synthetic_data' block
+    try:
+        synthetic_config = full_config['synthetic_data']
+    except KeyError:
+        print("Error: 'synthetic_data' key not found in the YAML file. Check your structure.")
+        exit(1)
+        
+    # --- Assigning parameters based on YAML structure ---
+    
+    # Access Instrument Parameters
+    instrument_params = synthetic_config['instrument']
+    lambda_min_measured = instrument_params['min_lambda']
+    lambda_max_measured = instrument_params['max_lambda']
+    N_lambda = instrument_params['n_lambda']
+    
+    # Wave length domain calculation (identical to original code)
+    # Note: Added int() casting to N_lambda as np.linspace usually expects an integer count.
+    lambda_instrument_data = np.linspace(lambda_min_measured, lambda_max_measured, int(N_lambda)) * 1e-9
 
-    standar_dev = args.noise_std
-    depth = args.depth
-    depth_metals = args.depth_metals
-    gamma = args.gamma
-    gamma_metals = args.gamma_metals
+    # Access Dataset Parameters
+    dataset_params = synthetic_config['dataset']
+    N_spectra = dataset_params['n_spectra']
+    random_parameters_enabled = dataset_params['random_parameters']
+
+    # Access Model Parameters
+    model_params = synthetic_config['model_params']
+    
+    # Noise
+    standar_dev = model_params['noise_std']
+    
+    # Non-metals
+    non_metals_params = model_params['non_metals']
+    depth = non_metals_params['depth']
+    gamma = non_metals_params['gamma']
+
+    
+    # Metals
+    metals_params = model_params['metals']
+    depth_metals = metals_params['depth']
+    gamma_metals = metals_params['gamma']
+    
+    # Final array (identical to original code)
     line_params = [depth, gamma, depth_metals, gamma_metals]
 
-    N_spectra = args.n_spectra
+    print(f"Configuration successfully loaded from {args.config}.")
+    print(f"Generating {N_spectra} spectra over {N_lambda} channels.")
+    print(f"Random parameters enabled: {random_parameters_enabled}")
 
     np.random.seed(42)
     T_values = np.random.uniform(3000, 15000, N_spectra)
@@ -134,7 +172,7 @@ if __name__ == "__main__":
     spectra_data[0, 1:] = lambda_instrument_data
 
     for i in tqdm(range(N_spectra), total=N_spectra, desc="Generating spectra"):
-        spectra_data[i+1,0], spectra_data[i+1,1:] = spectrum_generator(T_values[i], z_values[i], lambda_instrument_data, args.random_parameters, noise_standar_dev=standar_dev, line_params=line_params)
+        spectra_data[i+1,0], spectra_data[i+1,1:] = spectrum_generator(T_values[i], z_values[i], lambda_instrument_data, random_parameters_enabled, noise_standar_dev=standar_dev, line_params=line_params)
     
     FILE_DIR = Path(__file__).resolve().parent
     h5_path = FILE_DIR.parent.parent / "data" / "SpectraData.h5"
